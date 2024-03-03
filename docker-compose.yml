@@ -1,0 +1,58 @@
+version: '3.4'
+
+networks:
+  network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.5.0.0/16
+          gateway: 10.5.0.1
+
+services:
+  database:
+    image: postgres:16.2
+    container_name: database
+    environment:
+      - POSTGRES_MULTIPLE_DATABASES=TaskTrackerDataBase,AuthDataBase
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=mysecretpassword
+    ports:
+      - "5432:5432"
+    networks:
+      network:
+        ipv4_address: 10.5.0.2
+  rabbitmq:
+    image: rabbitmq:3.12-management
+    hostname: rabbitmq
+    container_name: rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: "rabbitmq"
+      RABBITMQ_DEFAULT_PASS: "rabbitmq"
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      network:
+        ipv4_address: 10.5.0.3
+  jwtauth:
+    image: ${DOCKER_REGISTRY-}jwtauth
+    container_name: auth
+    build:
+      context: .
+      dockerfile: JwtAuth/Dockerfile
+    ports:
+      - "5001:5001"
+    networks:
+      network:
+        ipv4_address: 10.5.0.4
+  tasktracker:
+    image: ${DOCKER_REGISTRY-}tasktracker
+    container_name: tasktracker
+    build:
+      context: .
+      dockerfile: TaskTracker/Dockerfile
+    ports:
+      - "5000:5000"
+    networks:
+      network:
+        ipv4_address: 10.5.0.5
