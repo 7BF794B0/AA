@@ -4,6 +4,8 @@ using System.Text;
 using TaskTracker.Identity;
 using TaskTracker.Models;
 
+
+Thread.Sleep(10000);
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.

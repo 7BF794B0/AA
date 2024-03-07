@@ -31,12 +31,22 @@ services:
     ports:
       - "5672:5672"
       - "15672:15672"
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 30s
+      timeout: 30s
+      retries: 3
     networks:
       network:
         ipv4_address: 10.5.0.3
   jwtauth:
     image: ${DOCKER_REGISTRY-}jwtauth
     container_name: auth
+    environment:
+      WAIT_HOSTS: database:5432, rabbitmq:5672
+    depends_on:
+      - database
+      - rabbitmq
     build:
       context: .
       dockerfile: JwtAuth/Dockerfile
@@ -48,6 +58,10 @@ services:
   tasktracker:
     image: ${DOCKER_REGISTRY-}tasktracker
     container_name: tasktracker
+    environment:
+      WAIT_HOSTS: jwtauth:5001
+    depends_on:
+      - jwtauth
     build:
       context: .
       dockerfile: TaskTracker/Dockerfile

@@ -18,7 +18,10 @@ namespace TaskTracker.Controllers
     {
         private readonly AppDbContext _context;
         private readonly ILogger<TasksController> _logger;
+
         private ConnectionFactory _factory;
+        private IConnection _connection;
+        private IModel _channel;
 
         public TasksController(AppDbContext context, ILogger<TasksController> logger)
         {
@@ -29,8 +32,12 @@ namespace TaskTracker.Controllers
             {
                 UserName = "rabbitmq",
                 Password = "rabbitmq",
-                HostName = "localhost"
+                HostName = "10.5.0.3"
             };
+
+            _connection = _factory.CreateConnection();
+            _channel = _connection.CreateModel();
+            _channel.QueueDeclare(queue: "task_to_assign", durable: true, exclusive: false, autoDelete: false, arguments: null);
         }
 
         private static TaskDTO TaskToDTO(TaskEnity task) =>
@@ -95,59 +102,41 @@ namespace TaskTracker.Controllers
         [HttpPost("assigntasks")]
         public async Task<ActionResult<TaskDTO>> AssignTasks()
         {
+            Random rnd = new Random();
+            List<UserDTO> users = new List<UserDTO>();
+
             using (var client = new HttpClient(new HttpClientHandler { AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate }))
             {
-                Random rnd = new Random();
-
                 HttpResponseMessage response = await client.GetAsync("http://10.5.0.4:5001/getallusers");
                 response.EnsureSuccessStatusCode();
                 var jsonResponse = await response.Content.ReadAsStringAsync();
-                var users = JsonSerializer.Deserialize<List<UserDTO>>(jsonResponse);
-                var len = users.Count();
-
-                List<TaskEnity> task2push = new List<TaskEnity>();
-                var tasks = await _context.Tasks.ToListAsync();
-                foreach (var task in tasks)
-                {
-                    task2push.Add(new TaskEnity
-                    {
-                        Id = task.Id,
-                        UserId = users[rnd.Next(len)].Id,
-                        CreatedBy = task.CreatedBy,
-                        Title = task.Title,
-                        Description = task.Description,
-                        Status = task.Status,
-                        Estimation = task.Estimation,
-                        CreatedAt = task.CreatedAt
-                    });
-                }
-
-                var options = new JsonSerializerOptions();
-                options.Converters.Add(new CustomDateTimeConverter("yyyy-MM-ddTHH:mm:ss.fffZ"));
-                var message = JsonSerializer.Serialize(task2push, options);
-
-                using (var connection = _factory.CreateConnection())
-                {
-                    using (var chanel = connection.CreateModel())
-                    {
-                        chanel.QueueDeclare(
-                            queue: "my_queue",
-                            exclusive: false,
-                            durable: true,
-                            autoDelete: false,
-                            arguments: null
-                            );
-
-                        var body = Encoding.UTF8.GetBytes(message);
-                        chanel.BasicPublish(
-                            exchange: "",
-                            routingKey: "my_queue",
-                            basicProperties: null,
-                            body: body
-                        );
-                    }
-                }
+                users = JsonSerializer.Deserialize<List<UserDTO>>(jsonResponse);
             }
+
+            var len = users.Count();
+            List<TaskEnity> task2push = new List<TaskEnity>();
+            var tasks = await _context.Tasks.ToListAsync();
+            foreach (var task in tasks)
+            {
+                task2push.Add(new TaskEnity
+                {
+                    Id = task.Id,
+                    UserId = users[rnd.Next(len)].Id,
+                    CreatedBy = task.CreatedBy,
+                    Title = task.Title,
+                    Description = task.Description,
+                    Status = task.Status,
+                    Estimation = task.Estimation,
+                    CreatedAt = task.CreatedAt
+                });
+            }
+
+            var options = new JsonSerializerOptions();
+            options.Converters.Add(new CustomDateTimeConverter("yyyy-MM-ddTHH:mm:ss.fffZ"));
+            var message = JsonSerializer.Serialize(task2push, options);
+
+            var body = Encoding.UTF8.GetBytes(message);
+            _channel.BasicPublish(exchange: "", routingKey: "task_to_assign", basicProperties: null, body: body);
 
             return Ok();
         }
