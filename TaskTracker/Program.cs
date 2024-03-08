@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using System.Text.Json.Serialization;
 using TaskTracker.Identity;
 using TaskTracker.Models;
 
@@ -37,7 +38,12 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy(IdentityData.PopugUserPolicyName, p => p.RequireClaim(IdentityData.PopugUserClaimName, "true"));
 });
 
-builder.Services.AddControllers();
+builder.Services.AddControllers().AddJsonOptions(opts =>
+{
+    var enumConverter = new JsonStringEnumConverter();
+    opts.JsonSerializerOptions.Converters.Add(enumConverter);
+});
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

@@ -97,6 +97,24 @@ namespace TaskTracker.Controllers
             return CreatedAtAction(nameof(GetTask), new { id = task.Id }, task);
         }
 
+        // POST: api/closetask/5
+        [Authorize(Policy = IdentityData.PopugUserPolicyName)]
+        [HttpPost("closetask/{id}")]
+        public async Task<IActionResult> CloseTask(int id)
+        {
+            TaskEnity? task = await _context.Tasks.FindAsync(id);
+            if (task != null)
+            {
+                task.Status = StatusEnum.Cancelled;
+                _context.SaveChanges();
+            }
+            else
+            {
+                return BadRequest("Task not found");
+            }
+            return Ok();
+        }
+
         // POST: api/assigntasks
         [Authorize(Policy = IdentityData.PopugUserPolicyName)]
         [HttpPost("assigntasks")]
@@ -118,17 +136,20 @@ namespace TaskTracker.Controllers
             var tasks = await _context.Tasks.ToListAsync();
             foreach (var task in tasks)
             {
-                task2push.Add(new TaskEnity
+                if (task.Status != StatusEnum.Cancelled)
                 {
-                    Id = task.Id,
-                    UserId = users[rnd.Next(len)].Id,
-                    CreatedBy = task.CreatedBy,
-                    Title = task.Title,
-                    Description = task.Description,
-                    Status = task.Status,
-                    Estimation = task.Estimation,
-                    CreatedAt = task.CreatedAt
-                });
+                    task2push.Add(new TaskEnity
+                    {
+                        Id = task.Id,
+                        UserId = users[rnd.Next(len)].Id,
+                        CreatedBy = task.CreatedBy,
+                        Title = task.Title,
+                        Description = task.Description,
+                        Status = task.Status,
+                        Estimation = task.Estimation,
+                        CreatedAt = task.CreatedAt
+                    });
+                }
             }
 
             var options = new JsonSerializerOptions();
