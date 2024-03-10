@@ -15,5 +15,8 @@ namespace Contracts
 
         [JsonPropertyName("role")]
         public required RoleEnum Role { get; set; }
+
+        [JsonPropertyName("balance")]
+        public required int Balance { get; set; } = 0;
     }
 }

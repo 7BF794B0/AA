@@ -2,11 +2,8 @@
 
 namespace Contracts
 {
-    public class TaskDTO
+    public class TaskRequest
     {
-        [JsonPropertyName("publicId")]
-        public int PublicId { get; set; }
-
         [JsonPropertyName("userId")]
         public required int UserId { get; set; }
 
@@ -27,11 +24,5 @@ namespace Contracts
 
         [JsonPropertyName("createdAt")]
         public required DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-
-        [JsonPropertyName("cost")]
-        public int Cost { get; set; } = 0;
-
-        [JsonPropertyName("reward")]
-        public int Reward { get; set; } = 0;
     }
 }

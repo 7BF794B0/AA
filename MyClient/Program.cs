@@ -33,6 +33,7 @@ namespace MyClient
                 {
                     var task = new TaskDTO()
                     {
+                        PublicId = i,
                         UserId = rnd.Next(1, users.Count + 1),
                         CreatedBy = rnd.Next(1, users.Count + 1),
                         Title = RandomString(32),

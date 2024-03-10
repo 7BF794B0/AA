@@ -44,5 +44,8 @@ namespace JwtAuth.Models
 
         [Required]
         public required RoleEnum Role { get; set; }
+
+        [Required]
+        public required int Balance { get; set; } = 0;
     }
 }

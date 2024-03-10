@@ -7,8 +7,11 @@ namespace TaskTracker.Models
     public class TaskEnity
     {
         [Key]
+        public Guid Id { get; set; }
+
+        [Required]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int Id { get; set; }
+        public int PublicId { get; }
 
         [Required]
         public required int UserId { get; set; }
@@ -23,12 +26,18 @@ namespace TaskTracker.Models
         public required string Description { get; set; }
 
         [Required]
-        public required StatusEnum Status { get; set; }
+        public StatusEnum Status { get; set; }
 
         [Required]
         public required double Estimation { get; set; }
 
         [Required]
-        public required DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+        [Required]
+        public required int Cost { get; set; } = 0; // сколько списать денег с сотрудника при ассайне задачи
+
+        [Required]
+        public required int Reward { get; set; } = 0; // сколько начислить денег сотруднику для выполненой задачи
     }
 }

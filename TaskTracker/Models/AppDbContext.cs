@@ -13,6 +13,7 @@ namespace TaskTracker.Models
 
         public AppDbContext(IConfiguration configuration)
         {
+            AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
             Configuration = configuration;
             Database.EnsureCreated();
         }
@@ -27,7 +28,8 @@ namespace TaskTracker.Models
 
             modelBuilder.Entity<TaskEnity>(e =>
             {
-                e.Property(p => p.Id).UseIdentityAlwaysColumn();
+                e.Property(p => p.Id).ValueGeneratedOnAdd();
+                e.Property(p => p.PublicId).UseIdentityAlwaysColumn();
                 e.Property(p => p.Status).HasConversion(new EnumToStringConverter<StatusEnum>());
             });
         }

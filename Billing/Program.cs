@@ -1,18 +1,15 @@
+using Billing.Identity;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System.Text.Json.Serialization;
-using TaskTracker.Identity;
-using TaskTracker.Models;
 
 
 Thread.Sleep(10000);
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddDbContext<AppDbContext>();
-builder.Services.AddHostedService<TaskTracker.ConsumeServiceAssign>();
-builder.Services.AddHostedService<TaskTracker.ConsumeServiceCreate>();
+builder.Services.AddHostedService<Billing.CalculateTaskCostService>();
 
 builder.Services.AddAuthentication(options =>
 {

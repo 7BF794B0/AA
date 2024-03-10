@@ -3,25 +3,25 @@
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 USER app
 WORKDIR /app
-EXPOSE 5000
-ENV ASPNETCORE_URLS=http://*:5000
+EXPOSE 5002
+ENV ASPNETCORE_URLS=http://*:5002
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["TaskTracker/TaskTracker.csproj", "TaskTracker/"]
+COPY ["Billing/Billing.csproj", "Billing/"]
 COPY ["Contracts/Contracts.csproj", "Contracts/"]
 COPY ["EventSchemaRegistry/EventSchemaRegistry.csproj", "EventSchemaRegistry/"]
-RUN dotnet restore "./TaskTracker/TaskTracker.csproj"
+RUN dotnet restore "./Billing/Billing.csproj"
 COPY . .
-WORKDIR "/src/TaskTracker"
-RUN dotnet build "./TaskTracker.csproj" -c $BUILD_CONFIGURATION -o /app/build
+WORKDIR "/src/Billing"
+RUN dotnet build "./Billing.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./TaskTracker.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "./Billing.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "TaskTracker.dll"]
+ENTRYPOINT ["dotnet", "Billing.dll"]

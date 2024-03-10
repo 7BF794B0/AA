@@ -70,3 +70,18 @@ services:
     networks:
       network:
         ipv4_address: 10.5.0.5
+  billing:
+    image: ${DOCKER_REGISTRY-}billing
+    container_name: billing
+    environment:
+      WAIT_HOSTS: tasktracker:5000
+    depends_on:
+      - tasktracker
+    build:
+      context: .
+      dockerfile: Billing/Dockerfile
+    ports:
+      - "5002:5002"
+    networks:
+      network:
+        ipv4_address: 10.5.0.6
