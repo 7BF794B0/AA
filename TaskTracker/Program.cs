@@ -1,7 +1,9 @@
+using Asp.Versioning;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System.Text.Json.Serialization;
+using TaskTracker.Controllers;
 using TaskTracker.Identity;
 using TaskTracker.Models;
 
@@ -10,7 +12,7 @@ Thread.Sleep(10000);
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddDbContext<AppDbContext>();
+builder.Services.AddDbContext<AppDbContext>(); // TODO config connection можно все же указывать тут, а не в AppDbContext
 builder.Services.AddHostedService<TaskTracker.ConsumeServiceAssign>();
 builder.Services.AddHostedService<TaskTracker.ConsumeServiceCreate>();
 
@@ -47,6 +49,16 @@ builder.Services.AddControllers().AddJsonOptions(opts =>
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddApiVersioning(options =>
+{
+    options.ReportApiVersions = true;
+    options.AssumeDefaultVersionWhenUnspecified = true;
+}).AddMvc(options =>
+{
+    options.Conventions.Controller<TasksController>().HasApiVersion(new ApiVersion(1));
+    options.Conventions.Controller<TasksController>().HasApiVersion(new ApiVersion(2));
+});
 
 var app = builder.Build();
 

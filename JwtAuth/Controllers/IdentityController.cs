@@ -38,10 +38,10 @@ namespace JwtAuth.Controllers
 
             var claims = new List<Claim>
             {
-                new(JwtRegisteredClaimNames.Jti, user.Id.ToString()),
+                new(JwtRegisteredClaimNames.Jti, user.PublicId.ToString()),
                 new(JwtRegisteredClaimNames.Sub, user.Email),
                 new(JwtRegisteredClaimNames.Email, user.Email),
-                new("userid", user.Id.ToString()),
+                new("userid", user.PublicId.ToString()),
                 new Claim(user.Role.ToString(), true.ToString(), ClaimValueTypes.Boolean)
             };
 
@@ -69,7 +69,7 @@ namespace JwtAuth.Controllers
             {
                 usersDto.Add(new UserDTO
                 {
-                    Id = user.Id,
+                    Id = user.PublicId,
                     Email = user.Email,
                     Name = user.Name,
                     Role = user.Role

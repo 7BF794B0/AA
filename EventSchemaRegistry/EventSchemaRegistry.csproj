@@ -10,4 +10,8 @@
     <PackageReference Include="NJsonSchema" Version="11.0.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="schemas\" />
+  </ItemGroup>
+
 </Project>

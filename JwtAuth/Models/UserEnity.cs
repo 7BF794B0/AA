@@ -26,8 +26,11 @@ namespace JwtAuth.Models
         private string _password = string.Empty;
 
         [Key]
+        public Guid Id { get; set; }
+
+        [Required]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int Id { get; set; }
+        public required int PublicId { get; set;  }
 
         [Required]
         public required string Email { get; set; }
@@ -44,8 +47,5 @@ namespace JwtAuth.Models
 
         [Required]
         public required RoleEnum Role { get; set; }
-
-        [Required]
-        public required int Balance { get; set; } = 0;
     }
 }

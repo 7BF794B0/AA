@@ -13,7 +13,7 @@ services:
     image: postgres:16.2
     container_name: database
     environment:
-      - POSTGRES_MULTIPLE_DATABASES=TaskTrackerDataBase,AuthDataBase
+      - POSTGRES_MULTIPLE_DATABASES=TaskTrackerDataBase,AuthDataBase,BillingDataBase
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=mysecretpassword
     ports:
@@ -39,6 +39,14 @@ services:
     networks:
       network:
         ipv4_address: 10.5.0.3
+  redis:
+    image: redis/redis-stack:7.2.0-v9
+    container_name: redis
+    ports:
+      - "6379:6379"
+    networks:
+      network:
+        ipv4_address: 10.5.0.7
   jwtauth:
     image: ${DOCKER_REGISTRY-}jwtauth
     container_name: auth
@@ -74,9 +82,10 @@ services:
     image: ${DOCKER_REGISTRY-}billing
     container_name: billing
     environment:
-      WAIT_HOSTS: tasktracker:5000
+      WAIT_HOSTS: tasktracker:5000, redis:6379
     depends_on:
       - tasktracker
+      - redis
     build:
       context: .
       dockerfile: Billing/Dockerfile
@@ -85,3 +94,20 @@ services:
     networks:
       network:
         ipv4_address: 10.5.0.6
+  analytics:
+    image: ${DOCKER_REGISTRY-}analytics
+    container_name: analytics
+    environment:
+      WAIT_HOSTS: tasktracker:5000, jwtauth:5001, billing:5002
+    depends_on:
+      - tasktracker
+      - jwtauth
+      - billing
+    build:
+      context: .
+      dockerfile: Analytics/Dockerfile
+    ports:
+      - "5003:5003"
+    networks:
+      network:
+        ipv4_address: 10.5.0.8

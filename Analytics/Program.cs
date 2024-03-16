@@ -1,20 +1,14 @@
-using Billing;
-using Billing.Identity;
-using Billing.Models;
+using Analytics;
+using Analytics.Identity;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System.Text.Json.Serialization;
 
-
 Thread.Sleep(10000);
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-builder.Services.AddDbContext<AppDbContext>();
-builder.Services.AddHostedService<CalculateTaskCostService>();
-builder.Services.AddHostedService<EnrollmentService>();
-builder.Services.AddBillingCycleService();
+builder.Services.AddHostedService<ConsumeServiceAnalytics>();
 
 builder.Services.AddAuthentication(options =>
 {
@@ -47,7 +41,6 @@ builder.Services.AddControllers().AddJsonOptions(opts =>
 });
 
 var app = builder.Build();
-SeedData.Initialize(app.Configuration);
 
 app.UseAuthentication();
 app.UseAuthorization();

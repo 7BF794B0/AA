@@ -15,7 +15,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Contracts", "Contracts\Cont
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EventSchemaRegistry", "EventSchemaRegistry\EventSchemaRegistry.csproj", "{35376EEB-6758-45F8-AE21-CD67455EBD10}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Billing", "Billing\Billing.csproj", "{EB0D6F25-A910-4250-A903-98B5D0777E94}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Billing", "Billing\Billing.csproj", "{EB0D6F25-A910-4250-A903-98B5D0777E94}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Analytics", "Analytics\Analytics.csproj", "{0548E395-9429-498C-B368-55C1355DEF47}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -51,6 +53,10 @@ Global
 		{EB0D6F25-A910-4250-A903-98B5D0777E94}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EB0D6F25-A910-4250-A903-98B5D0777E94}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EB0D6F25-A910-4250-A903-98B5D0777E94}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0548E395-9429-498C-B368-55C1355DEF47}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0548E395-9429-498C-B368-55C1355DEF47}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0548E395-9429-498C-B368-55C1355DEF47}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0548E395-9429-498C-B368-55C1355DEF47}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

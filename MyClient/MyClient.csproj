@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Contracts\Contracts.csproj" />
+    <ProjectReference Include="..\EventSchemaRegistry\EventSchemaRegistry.csproj" />
   </ItemGroup>
 
 </Project>
