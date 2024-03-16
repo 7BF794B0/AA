@@ -16,6 +16,9 @@ namespace Contracts
         [JsonPropertyName("title")]
         public required string Title { get; set; }
 
+        [JsonPropertyName("jiraId ")]
+        public string? JiraId { get; set; }
+
         [JsonPropertyName("description")]
         public required string Description { get; set; }
 

@@ -10,6 +10,7 @@ using RabbitMQ.Client;
 using System.Text;
 using System.Text.Json.Serialization;
 using EventSchemaRegistry;
+using Asp.Versioning;
 
 namespace TaskTracker.Controllers
 {
@@ -23,15 +24,20 @@ namespace TaskTracker.Controllers
 
         private SchemaRegistry<List<TaskDTO>> _schemaRegistryListTaskDTO;
         private SchemaRegistry<TaskDTO> _schemaRegistryTaskDTO;
+        private SchemaRegistry<List<DoubleEntryBookkeepingDTO>> _schemaRegistryDoubleEntryBookkeepingDTO;
 
         private ConnectionFactory _factory;
         private IConnection _connection;
+
         private IModel _channelAssign;
         private IModel _channelMonetary;
         private IModel _createChannel;
+        private IModel _channelDoubleEntry;
+
         private readonly string _queueAssign = "task_to_assign";
         private readonly string _queueMonetary = "task_to_monetary";
         private readonly string _createQueue = "task_to_create";
+        private readonly string _queueDoubleEntry = "double_entry_to_billing";
 
         public TasksController(AppDbContext context, ILogger<TasksController> logger)
         {
@@ -40,6 +46,7 @@ namespace TaskTracker.Controllers
 
             _schemaRegistryListTaskDTO = new SchemaRegistry<List<TaskDTO>>();
             _schemaRegistryTaskDTO = new SchemaRegistry<TaskDTO>();
+            _schemaRegistryDoubleEntryBookkeepingDTO = new SchemaRegistry<List<DoubleEntryBookkeepingDTO>>();
 
             _factory = new ConnectionFactory()
             {
@@ -57,6 +64,9 @@ namespace TaskTracker.Controllers
 
             _createChannel = _connection.CreateModel();
             _createChannel.QueueDeclare(queue: _createQueue, durable: true, exclusive: false, autoDelete: false, arguments: null);
+
+            _channelDoubleEntry = _connection.CreateModel();
+            _channelDoubleEntry.QueueDeclare(queue: _queueDoubleEntry, durable: true, exclusive: false, autoDelete: false, arguments: null);
         }
 
         private static TaskDTO TaskToDTO(TaskEnity task) =>
@@ -99,11 +109,28 @@ namespace TaskTracker.Controllers
         // POST: api/Tasks
         [Authorize(Policy = IdentityData.PopugUserPolicyName)]
         [HttpPost]
-        public async Task<ActionResult<TaskDTO>> AddTask(TaskRequest taskRequest)
+        public async Task<ActionResult<TaskDTO>> AddTask(TaskRequest taskRequest, ApiVersion apiVersion)
         {
+            string GetStringBetweenCharacters(string input, char charFrom, char charTo)
+            {
+                int posFrom = input.IndexOf(charFrom);
+                if (posFrom != -1)
+                {
+                    int posTo = input.IndexOf(charTo, posFrom + 1);
+                    if (posTo != -1)
+                    {
+                        return input.Substring(posFrom, posTo - posFrom + 1);
+                    }
+                }
+
+                return string.Empty;
+            }
+
             var options = new JsonSerializerOptions();
             options.Converters.Add(new JsonStringEnumConverter());
             options.Converters.Add(new CustomDateTimeConverter("yyyy-MM-ddTHH:mm:ss.fffZ"));
+
+            string message = string.Empty;
 
             var taskDto = new TaskDTO
             {
@@ -116,16 +143,28 @@ namespace TaskTracker.Controllers
                 CreatedAt = taskRequest.CreatedAt
             };
 
-            var message = JsonSerializer.Serialize(taskDto, options);
+            if (apiVersion.MajorVersion == 2)
+            {
+                string substring = GetStringBetweenCharacters(taskDto.Title, '[', ']');
+                if (substring != string.Empty)
+                {
+                    taskDto.Title = taskRequest.Title.Replace(substring, "");
+                    taskDto.JiraId = substring;
+                }
+                else
+                {
+                    taskDto.Title = taskRequest.Title;
+                    taskDto.JiraId = taskRequest.JiraId;
+                }
+            }
+
+            message = JsonSerializer.Serialize(taskDto, options);
             if (_schemaRegistryTaskDTO.ValidateSchema(message))
             {
                 var body = Encoding.UTF8.GetBytes(message);
                 _channelMonetary.BasicPublish(exchange: "", routingKey: _queueMonetary, basicProperties: null, body: body);
             }
-            else
-            {
-                return BadRequest("JSON Schema is not valid");
-            }
+            else return BadRequest("JSON Schema is not valid");
 
             return Ok();
         }
@@ -135,11 +174,37 @@ namespace TaskTracker.Controllers
         [HttpPost("closetask/{id}")]
         public async Task<IActionResult> CloseTask(int id)
         {
+            var options = new JsonSerializerOptions();
+            options.Converters.Add(new JsonStringEnumConverter());
+            options.Converters.Add(new CustomDateTimeConverter("yyyy-MM-ddTHH:mm:ss.fffZ"));
+
             TaskEnity? task = await _context.Tasks.FirstOrDefaultAsync(f => f.PublicId == id);
             if (task != null)
             {
+                List<DoubleEntryBookkeepingDTO> lstBookkeeping =
+                [
+                    new DoubleEntryBookkeepingDTO()
+                    {
+                        TransactionType = TransactionTypeEnum.Income,
+                        UserId = task.UserId,
+                        TaskId = task.PublicId,
+                        Value = task.Reward
+                    },
+                ];
+
                 task.Status = StatusEnum.Cancelled;
                 _context.SaveChanges();
+
+                var message = JsonSerializer.Serialize(lstBookkeeping, options);
+                if (_schemaRegistryDoubleEntryBookkeepingDTO.ValidateSchema(message))
+                {
+                    var body = Encoding.UTF8.GetBytes(message);
+                    _channelDoubleEntry.BasicPublish(exchange: "", routingKey: _queueDoubleEntry, basicProperties: null, body: body);
+                }
+                else
+                {
+                    return BadRequest("JSON Schema is not valid");
+                }
             }
             else
             {
@@ -167,6 +232,8 @@ namespace TaskTracker.Controllers
                 var jsonResponse = await response.Content.ReadAsStringAsync();
                 users = JsonSerializer.Deserialize<List<UserDTO>>(jsonResponse, options);
             }
+
+            users = users!.Where(x => x.Role == RoleEnum.Popug).ToList();
 
             int len = 0;
             if (users != null)

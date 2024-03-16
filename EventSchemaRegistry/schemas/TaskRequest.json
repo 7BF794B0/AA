@@ -1,0 +1,67 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "TaskRequest",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "userId": {
+      "type": "integer",
+      "format": "int32"
+    },
+    "createdBy": {
+      "type": "integer",
+      "format": "int32"
+    },
+    "title": {
+      "type": "string"
+    },
+    "jiraId ": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "description": {
+      "type": "string"
+    },
+    "status": {
+      "$ref": "#/definitions/StatusEnum"
+    },
+    "estimation": {
+      "type": "number",
+      "format": "double"
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "definitions": {
+    "StatusEnum": {
+      "type": "string",
+      "description": "",
+      "x-enumNames": [
+        "Open",
+        "InProgress",
+        "Done",
+        "ToDo",
+        "InReview",
+        "UnderReview",
+        "Approved",
+        "Cancelled",
+        "Rejected"
+      ],
+      "enum": [
+        "Open",
+        "InProgress",
+        "Done",
+        "ToDo",
+        "InReview",
+        "UnderReview",
+        "Approved",
+        "Cancelled",
+        "Rejected"
+      ]
+    }
+  }
+}

@@ -1,0 +1,79 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "TaskDTO",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "publicId": {
+      "type": "integer",
+      "format": "int32"
+    },
+    "userId": {
+      "type": "integer",
+      "format": "int32"
+    },
+    "createdBy": {
+      "type": "integer",
+      "format": "int32"
+    },
+    "title": {
+      "type": "string"
+    },
+    "jiraId ": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "description": {
+      "type": "string"
+    },
+    "status": {
+      "$ref": "#/definitions/StatusEnum"
+    },
+    "estimation": {
+      "type": "number",
+      "format": "double"
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "cost": {
+      "type": "integer",
+      "format": "int32"
+    },
+    "reward": {
+      "type": "integer",
+      "format": "int32"
+    }
+  },
+  "definitions": {
+    "StatusEnum": {
+      "type": "string",
+      "description": "",
+      "x-enumNames": [
+        "Open",
+        "InProgress",
+        "Done",
+        "ToDo",
+        "InReview",
+        "UnderReview",
+        "Approved",
+        "Cancelled",
+        "Rejected"
+      ],
+      "enum": [
+        "Open",
+        "InProgress",
+        "Done",
+        "ToDo",
+        "InReview",
+        "UnderReview",
+        "Approved",
+        "Cancelled",
+        "Rejected"
+      ]
+    }
+  }
+}

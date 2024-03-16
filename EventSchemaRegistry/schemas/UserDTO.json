@@ -1,0 +1,41 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "UserDTO",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "integer",
+      "format": "int32"
+    },
+    "email": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "role": {
+      "$ref": "#/definitions/RoleEnum"
+    },
+    "balance": {
+      "type": "integer",
+      "format": "int32"
+    }
+  },
+  "definitions": {
+    "RoleEnum": {
+      "type": "string",
+      "description": "",
+      "x-enumNames": [
+        "Popug",
+        "Admin",
+        "Accountant"
+      ],
+      "enum": [
+        "Popug",
+        "Admin",
+        "Accountant"
+      ]
+    }
+  }
+}

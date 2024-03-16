@@ -54,9 +54,9 @@ namespace TaskTracker
                     options.Converters.Add(new CustomDateTimeConverter("yyyy-MM-ddTHH:mm:ss.fffZ"));
 
                     var t = JsonSerializer.Deserialize<TaskDTO>(message, options);
-                    _context.Tasks.Add(new TaskEnity()
+                    var entity = new TaskEnity()
                     {
-                        UserId = t.UserId,
+                        UserId = t!.UserId,
                         CreatedBy = t.CreatedBy,
                         Title = t.Title,
                         Description = t.Description,
@@ -65,7 +65,11 @@ namespace TaskTracker
                         CreatedAt = t.CreatedAt,
                         Cost = t.Cost,
                         Reward = t.Reward
-                    });
+                    };
+                    if (t.JiraId != null)
+                        entity.JiraId = t.JiraId;
+
+                    _context.Tasks.Add(entity);
                     await _context.SaveChangesAsync();
                 }
                 else throw new InvalidOperationException("JSON Schema is not valid");
