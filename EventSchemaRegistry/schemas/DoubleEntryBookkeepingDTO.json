@@ -1,0 +1,37 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "DoubleEntryBookkeepingDTO",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "UserId": {
+      "type": "integer",
+      "format": "int32"
+    },
+    "TransactionType": {
+      "$ref": "#/definitions/TransactionTypeEnum"
+    },
+    "TaskId": {
+      "type": "integer",
+      "format": "int32"
+    },
+    "Value": {
+      "type": "integer",
+      "format": "int32"
+    }
+  },
+  "definitions": {
+    "TransactionTypeEnum": {
+      "type": "string",
+      "description": "",
+      "x-enumNames": [
+        "Income",
+        "Outcome"
+      ],
+      "enum": [
+        "Income",
+        "Outcome"
+      ]
+    }
+  }
+}

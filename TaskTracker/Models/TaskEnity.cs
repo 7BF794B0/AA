@@ -22,6 +22,8 @@ namespace TaskTracker.Models
         [Required]
         public required string Title { get; set; }
 
+        public string? JiraId { get; set; }
+
         [Required]
         public required string Description { get; set; }
 
